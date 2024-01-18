@@ -8,9 +8,9 @@ namespace LegislativeData.Domain.Interfaces
 {
     public interface ICsvHelperImpl
     {
-        public IEnumerable<Bills> ReadBillsCsv(string path);
-        public IEnumerable<Legislators> ReadLegislatorsCsv(string path);
+        public IDictionary<int, Bills> ReadBillsCsv(string path);
+        public IDictionary<int, string> ReadLegislatorsCsv(string path);
         public IEnumerable<VoteResults> ReadVotesResultCsv(string path);
-        public IEnumerable<Votes> ReadVotesCsv(string path);
+        public IDictionary<int, Votes> ReadVotesCsv(string path);
     }
 }

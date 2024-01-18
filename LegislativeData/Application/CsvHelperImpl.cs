@@ -12,28 +12,30 @@ namespace LegislativeData.Application
 {
     public class CsvHelperImpl : ICsvHelperImpl
     {
-        public IEnumerable<Bills> ReadBillsCsv(string path)
+        public IDictionary<int, Bills> ReadBillsCsv(string path)
         {
             ReadFile(path, out var csv);
 
-            var records = csv.GetRecords<Bills>().ToHashSet();
-            return records;
+            var records = csv.GetRecords<Bills>().ToList();
+
+            return records.ToDictionary(bills => bills.Id, bills => bills);
         }
 
-        public IEnumerable<Legislators> ReadLegislatorsCsv(string path)
+        public IDictionary<int, string> ReadLegislatorsCsv(string path)
         {
             ReadFile(path, out var csv);
 
             var records = csv.GetRecords<Legislators>().ToList();
-            return records;
+                
+            return records.ToDictionary(values => values.Id, values => values.Name);
         }
 
-        public IEnumerable<Votes> ReadVotesCsv(string path)
+        public IDictionary<int, Votes> ReadVotesCsv(string path)
         {
             ReadFile(path, out var csv);
 
             var records = csv.GetRecords<Votes>().ToList();
-            return records;
+            return records.ToDictionary(votes => votes.Id, votes => votes);
         }
 
         public IEnumerable<VoteResults> ReadVotesResultCsv(string path)
