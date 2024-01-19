@@ -36,7 +36,8 @@ namespace LegislativeData
             {
                 if(!VerifyFiles(path_bills, path_lagislators, path_votesResults, path_votes))
                 {
-                    _logger.LogInformation("One of the data files was not found");
+                    _logger.LogInformation("One of the data files was not found (bills.csv, legislators.csv, vote_results.csv or votes.csvs), please, put on the right folder");
+                    await Task.Delay(5000, stoppingToken);
                 }
 
                 if (VerifyFiles(path_bills, path_lagislators, path_votesResults, path_votes))
@@ -45,8 +46,6 @@ namespace LegislativeData
                     var legislators = _csvHelper.ReadLegislatorsCsv(path_lagislators);
                     var votesResults = _csvHelper.ReadVotesResultCsv(path_votesResults);
                     var votes = _csvHelper.ReadVotesCsv(path_votes);
-
-                    RemoveFiles(path_votes, path_bills, path_lagislators, path_votesResults);
 
                     var votesPerLegislators = votesResults
                                     .GroupBy(voteResult => voteResult.Legislator_id)
@@ -86,6 +85,7 @@ namespace LegislativeData
 
                     _csvHelper.WriteResults(votesPerLegislators, fileOutput1);
                     _csvHelper.WriteResults(votesPerBills, fileOutput2);
+                    _logger.LogInformation("files successfully generated, check in the root path");
                     _applicationLifetime.StopApplication();
                 }
 
@@ -93,16 +93,7 @@ namespace LegislativeData
                 {
                     _logger.LogInformation("Worker running at: {time}", DateTimeOffset.Now);
                 }
-                await Task.Delay(1000, stoppingToken);
             }
-        }
-
-        private static void RemoveFiles(string path, string path2, string path3, string path4)
-        {
-            File.Delete(path);
-            File.Delete(path2);
-            File.Delete(path3);
-            File.Delete(path4);
         }
 
         private static bool VerifyFiles(string path, string path2, string path3, string path4)
