@@ -17,6 +17,7 @@ namespace LegislativeData.Application
             ReadFile(path, out var csv);
 
             var records = csv.GetRecords<Bills>().ToList();
+            csv.Dispose();
 
             return records.ToDictionary(bills => bills.Id, bills => bills);
         }
@@ -26,7 +27,8 @@ namespace LegislativeData.Application
             ReadFile(path, out var csv);
 
             var records = csv.GetRecords<Legislators>().ToList();
-                
+            csv.Dispose();
+
             return records.ToDictionary(values => values.Id, values => values.Name);
         }
 
@@ -35,6 +37,8 @@ namespace LegislativeData.Application
             ReadFile(path, out var csv);
 
             var records = csv.GetRecords<Votes>().ToList();
+            csv.Dispose();
+
             return records.ToDictionary(votes => votes.Id, votes => votes);
         }
 
@@ -43,7 +47,19 @@ namespace LegislativeData.Application
             ReadFile(path, out var csv);
 
             var records = csv.GetRecords<VoteResults>().ToList();
+            csv.Dispose();
+
             return records;
+        }
+
+        public bool WriteResults<T>(IEnumerable<T> data, string path)
+        {
+            using (var writer = new StreamWriter(path))
+            using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
+            {
+                csv.WriteRecords(data);
+                return true;
+            }
         }
 
         private static void ReadFile(string path, out CsvReader csv)

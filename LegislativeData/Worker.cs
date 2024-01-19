@@ -1,7 +1,9 @@
+using CsvHelper;
 using LegislativeData.Domain;
 using LegislativeData.Domain.Enum;
 using LegislativeData.Domain.Interfaces;
 using Microsoft.Extensions.Configuration;
+using System.Globalization;
 
 namespace LegislativeData
 {
@@ -32,50 +34,65 @@ namespace LegislativeData
             var path_votesResults = Path.Combine(PATH_BASE, _configuration.GetValue<string>("VoteResultsFile"));
             var path_votes = Path.Combine(PATH_BASE, _configuration.GetValue<string>("VotesFile"));
 
-
-            var bills = _csvHelper.ReadBillsCsv(path_bills);
-            var legislators = _csvHelper.ReadLegislatorsCsv(path_lagislators);
-            var votesResults = _csvHelper.ReadVotesResultCsv(path_votesResults);
-            var votes = _csvHelper.ReadVotesCsv(path_votes);
-
+            var fileOutput1 = Path.Combine(PATH_BASE, _configuration.GetValue<string>("FileOutput1"));
+            var fileOutput2 = Path.Combine(PATH_BASE, _configuration.GetValue<string>("FileOutput2"));
+            
             while (!stoppingToken.IsCancellationRequested)
             {
+                if(!VerifyFiles(path_bills, path_lagislators, path_votesResults, path_votes))
+                {
+                    _logger.LogInformation("One of the data files was not found");
+                }
 
-                var votesPerLegislators = votesResults
-                                          .GroupBy(voteResult => voteResult.Legislator_id)
-                                          .Select(votesResultPerLegislators =>
-                                          {
-                                              var votesOpposedPerLegislator = votesResultPerLegislators.Count(numVotes => numVotes.Vote_type == 2);
-                                              var votesSupportedPerLegislator = votesResultPerLegislators.Count(numVotes => numVotes.Vote_type == 1);
-                                              var legislator = legislators.TryGetValue(votesResultPerLegislators.Key, out var nameLegislator);
+                if (VerifyFiles(path_bills, path_lagislators, path_votesResults, path_votes))
+                {
+                    var bills = _csvHelper.ReadBillsCsv(path_bills);
+                    var legislators = _csvHelper.ReadLegislatorsCsv(path_lagislators);
+                    var votesResults = _csvHelper.ReadVotesResultCsv(path_votesResults);
+                    var votes = _csvHelper.ReadVotesCsv(path_votes);
 
-                                              return new LegislatorsSupport
+                    RemoveFiles(path_votes, path_bills, path_lagislators, path_votesResults);
+
+
+                    var votesPerLegislators = votesResults
+                                              .GroupBy(voteResult => voteResult.Legislator_id)
+                                              .Select(votesResultPerLegislators =>
                                               {
-                                                  Id = votesResultPerLegislators.Key,
-                                                  Name = legislator ? nameLegislator : "Unknown",
-                                                  Num_opposed_bills = votesOpposedPerLegislator,
-                                                  Num_supported_bills = votesSupportedPerLegislator
-                                              };
-                                          });
+                                                  var votesOpposedPerLegislator = votesResultPerLegislators.Count(numVotes => numVotes.Vote_type == 2);
+                                                  var votesSupportedPerLegislator = votesResultPerLegislators.Count(numVotes => numVotes.Vote_type == 1);
+                                                  var legislator = legislators.TryGetValue(votesResultPerLegislators.Key, out var nameLegislator);
 
-                var votesPerBills = votesResults
-                                          .GroupBy(voteResult => voteResult.Vote_id)
-                                          .Select(votesResultPerBills =>
-                                          {
-                                              var existVote = votes.TryGetValue(votesResultPerBills.Key, out var vote);
-                                              var existBill = bills.TryGetValue(vote.Bill_id, out var bill);
-                                              var votesOpposedCount = votesResultPerBills.Count(numVotes => numVotes.Vote_type == 2);
-                                              var votesSupportedCount = votesResultPerBills.Count(numVotes => numVotes.Vote_type == 1);
+                                                  return new LegislatorsSupport
+                                                  {
+                                                      id = votesResultPerLegislators.Key,
+                                                      name = legislator ? nameLegislator : "Unknown",
+                                                      num_opposed_bills = votesOpposedPerLegislator,
+                                                      num_supported_bills = votesSupportedPerLegislator
+                                                  };
+                                              });
 
-                                              return new BillsResult
+                    var votesPerBills = votesResults
+                                              .GroupBy(voteResult => voteResult.Vote_id)
+                                              .Select(votesResultPerBills =>
                                               {
-                                                  Id = bill.Id,
-                                                  Title = bill.Title,
-                                                  Opposer_count = votesOpposedCount,
-                                                  Suporter_count = votesSupportedCount,
-                                                  Primary_sponsor = legislators.TryGetValue(bill.Sponsor_id, out var legislator) ? legislator : "Unknow"
-                                              };
-                                          });
+                                                  var existVote = votes.TryGetValue(votesResultPerBills.Key, out var vote);
+                                                  var existBill = bills.TryGetValue(vote.Bill_id, out var bill);
+                                                  var votesOpposedCount = votesResultPerBills.Count(numVotes => numVotes.Vote_type == 2);
+                                                  var votesSupportedCount = votesResultPerBills.Count(numVotes => numVotes.Vote_type == 1);
+
+                                                  return new BillsResult
+                                                  {
+                                                      id = bill.Id,
+                                                      title = bill.Title,
+                                                      opposer_count = votesOpposedCount,
+                                                      suporter_count = votesSupportedCount,
+                                                      primary_sponsor = legislators.TryGetValue(bill.Sponsor_id, out var legislator) ? legislator : "Unknow"
+                                                  };
+                                              });
+                    _csvHelper.WriteResults(votesPerLegislators, fileOutput1);
+                    _csvHelper.WriteResults(votesPerBills, fileOutput2);
+                    _applicationLifetime.StopApplication();
+                }
 
                 if (_logger.IsEnabled(LogLevel.Information))
                 {
@@ -85,6 +102,19 @@ namespace LegislativeData
             }
 
             _applicationLifetime.StopApplication();
+        }
+
+        private static void RemoveFiles(string path, string path2, string path3, string path4)
+        {
+            File.Delete(path);
+            File.Delete(path2);
+            File.Delete(path3);
+            File.Delete(path4);
+        }
+
+        private static bool VerifyFiles(string path, string path2, string path3, string path4)
+        {
+            return Path.Exists(path) && Path.Exists(path2) && Path.Exists(path3) && Path.Exists(path4);
         }
     }
 }

@@ -8,10 +8,10 @@ namespace LegislativeData.Domain
 {
     public class BillsResult
     {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public int Suporter_count { get; set; }
-        public int Opposer_count { get; set; }
-        public string Primary_sponsor { get; set; }
+        public int id { get; set; }
+        public string title { get; set; }
+        public int suporter_count { get; set; }
+        public int opposer_count { get; set; }
+        public string primary_sponsor { get; set; }
     }
 }

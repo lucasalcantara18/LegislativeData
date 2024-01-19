@@ -12,5 +12,7 @@ namespace LegislativeData.Domain.Interfaces
         public IDictionary<int, string> ReadLegislatorsCsv(string path);
         public IEnumerable<VoteResults> ReadVotesResultCsv(string path);
         public IDictionary<int, Votes> ReadVotesCsv(string path);
+
+        public bool WriteResults<T>(IEnumerable<T> data, string path);
     }
 }

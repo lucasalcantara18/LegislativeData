@@ -8,9 +8,9 @@ namespace LegislativeData.Domain
 {
     public class LegislatorsSupport
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public int Num_supported_bills { get; set; }
-        public int Num_opposed_bills { get; set; }
+        public int id { get; set; }
+        public string name { get; set; }
+        public int num_supported_bills { get; set; }
+        public int num_opposed_bills { get; set; }
     }
 }
