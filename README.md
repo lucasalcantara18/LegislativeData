@@ -11,8 +11,7 @@
 
 ## About Application
 
-Essa aplicação faz parte de um sistema para estudos de novas tecnologias e fixação de conceitos. 
-Esta será uma API responsavel pelo gerenciamento de usuarios do banco GhostBank, um banco digital focado na facilitação da vida financeira para o cliente.
+This application is part of a test, where an analysis of legislative data must be conducted, and files with the results should be generated.
 
 ### Questions
 

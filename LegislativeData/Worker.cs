@@ -48,42 +48,41 @@ namespace LegislativeData
 
                     RemoveFiles(path_votes, path_bills, path_lagislators, path_votesResults);
 
-
                     var votesPerLegislators = votesResults
-                                              .GroupBy(voteResult => voteResult.Legislator_id)
-                                              .Select(votesResultPerLegislators =>
-                                              {
-                                                  var votesOpposedPerLegislator = votesResultPerLegislators.Count(numVotes => numVotes.Vote_type == 2);
-                                                  var votesSupportedPerLegislator = votesResultPerLegislators.Count(numVotes => numVotes.Vote_type == 1);
-                                                  var legislator = legislators.TryGetValue(votesResultPerLegislators.Key, out var nameLegislator);
+                                    .GroupBy(voteResult => voteResult.Legislator_id)
+                                    .Select(votesResultPerLegislators =>
+                                    {
+                                        var votesOpposedPerLegislator = votesResultPerLegislators.Count(numVotes => numVotes.Vote_type == 2);
+                                        var votesSupportedPerLegislator = votesResultPerLegislators.Count(numVotes => numVotes.Vote_type == 1);
+                                        var legislator = legislators.TryGetValue(votesResultPerLegislators.Key, out var nameLegislator);
 
-                                                  return new LegislatorsSupport
-                                                  {
-                                                      id = votesResultPerLegislators.Key,
-                                                      name = legislator ? nameLegislator : "Unknown",
-                                                      num_opposed_bills = votesOpposedPerLegislator,
-                                                      num_supported_bills = votesSupportedPerLegislator
-                                                  };
-                                              });
+                                        return new LegislatorsSupport
+                                        {
+                                            id = votesResultPerLegislators.Key,
+                                            name = legislator ? nameLegislator : "Unknown",
+                                            num_opposed_bills = votesOpposedPerLegislator,
+                                            num_supported_bills = votesSupportedPerLegislator
+                                        };
+                                    });
 
                     var votesPerBills = votesResults
-                                              .GroupBy(voteResult => voteResult.Vote_id)
-                                              .Select(votesResultPerBills =>
-                                              {
-                                                  var existVote = votes.TryGetValue(votesResultPerBills.Key, out var vote);
-                                                  var existBill = bills.TryGetValue(vote.Bill_id, out var bill);
-                                                  var votesOpposedCount = votesResultPerBills.Count(numVotes => numVotes.Vote_type == 2);
-                                                  var votesSupportedCount = votesResultPerBills.Count(numVotes => numVotes.Vote_type == 1);
+                                    .GroupBy(voteResult => voteResult.Vote_id)
+                                    .Select(votesResultPerBills =>
+                                    {
+                                        var existVote = votes.TryGetValue(votesResultPerBills.Key, out var vote);
+                                        var existBill = bills.TryGetValue(vote.Bill_id, out var bill);
+                                        var votesOpposedCount = votesResultPerBills.Count(numVotes => numVotes.Vote_type == 2);
+                                        var votesSupportedCount = votesResultPerBills.Count(numVotes => numVotes.Vote_type == 1);
 
-                                                  return new BillsResult
-                                                  {
-                                                      id = bill.Id,
-                                                      title = bill.Title,
-                                                      opposer_count = votesOpposedCount,
-                                                      suporter_count = votesSupportedCount,
-                                                      primary_sponsor = legislators.TryGetValue(bill.Sponsor_id, out var legislator) ? legislator : "Unknow"
-                                                  };
-                                              });
+                                        return new BillsResult
+                                        {
+                                            id = bill.Id,
+                                            title = bill.Title,
+                                            opposer_count = votesOpposedCount,
+                                            suporter_count = votesSupportedCount,
+                                            primary_sponsor = legislators.TryGetValue(bill.Sponsor_id, out var legislator) ? legislator : "Unknow"
+                                        };
+                                    });
 
                     _csvHelper.WriteResults(votesPerLegislators, fileOutput1);
                     _csvHelper.WriteResults(votesPerBills, fileOutput2);
