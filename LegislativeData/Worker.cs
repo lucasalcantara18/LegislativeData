@@ -1,10 +1,5 @@
-using CsvHelper;
 using LegislativeData.Domain;
-using LegislativeData.Domain.Enum;
 using LegislativeData.Domain.Interfaces;
-using Microsoft.Extensions.Configuration;
-using System.Globalization;
-
 namespace LegislativeData
 {
     public class Worker : BackgroundService
@@ -89,6 +84,7 @@ namespace LegislativeData
                                                       primary_sponsor = legislators.TryGetValue(bill.Sponsor_id, out var legislator) ? legislator : "Unknow"
                                                   };
                                               });
+
                     _csvHelper.WriteResults(votesPerLegislators, fileOutput1);
                     _csvHelper.WriteResults(votesPerBills, fileOutput2);
                     _applicationLifetime.StopApplication();
@@ -100,8 +96,6 @@ namespace LegislativeData
                 }
                 await Task.Delay(1000, stoppingToken);
             }
-
-            _applicationLifetime.StopApplication();
         }
 
         private static void RemoveFiles(string path, string path2, string path3, string path4)
