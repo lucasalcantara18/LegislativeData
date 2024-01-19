@@ -1,6 +1,6 @@
 <h1 align="center">Working with Legislative Data</h1>
 <p align="center">
-    A worker to 
+    A worker to analyze legislation data
 </p>
   
 ## Index
@@ -16,6 +16,7 @@ Esta será uma API responsavel pelo gerenciamento de usuarios do banco GhostBank
 
 ### Questions
 
-- [**.Net6**](https://learn.microsoft.com/pt-br/dotnet/)
-- [**Entity Framework**](https://learn.microsoft.com/pt-br/ef/)
-- [**XUnit**](https://xunit.net/)
+- Discuss your solution’s time complexity. What tradeoffs did you make?
+- How would you change your solution to account for future columns that might be requested, such as “Bill Voted On Date” or “Co-Sponsors”?
+- How would you change your solution if instead of receiving CSVs of data, you were given a list of legislators or bills that you should generate a CSV for?
+- How long did you spend working on the assignment?
